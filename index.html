@@ -5,76 +5,58 @@
 <title>Word Guess</title>
 <link href="https://fonts.googleapis.com/css2?family=Comfortaa&display=swap" rel="stylesheet">
 <style>
-  body {
-    font-family: 'Comfortaa', cursive;
-    margin: 0;
-    height: 100vh;
-    background: linear-gradient(to bottom, #1e3c72, #2a5298);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  body { font-family:'Comfortaa', cursive; margin:0; height:100vh; background: linear-gradient(to bottom,#1e3c72,#2a5298); display:flex; justify-content:center; align-items:center; }
+  .card { position: relative; background:white; border-radius:20px; padding:30px 40px 40px 40px; box-shadow:0 12px 30px rgba(0,0,0,0.4); text-align:center; min-width:350px; max-width:500px; }
+  h1,h2,h3 { color:#003366; margin-bottom:20px; }
+  input { width:85%; padding:12px; margin:12px 0; border-radius:8px; border:1px solid #ccc; font-size:16px; }
+  input:focus { border-color:#007BFF; outline:none; }
+  button { padding:12px 25px; margin-top:15px; border-radius:8px; border:none; font-size:16px; background-color:#007BFF; color:white; cursor:pointer; }
+  button:hover { background-color:#0056b3; }
+  .red-button { background-color:#FF4C4C; position:absolute; top:15px; left:15px; padding:8px 15px; border-radius:8px; }
+  .red-button:hover { background-color:#cc0000; }
+  .hidden { display:none; }
+  .streak { font-size:24px; margin-bottom:20px; color:#ff4500; }
+  .hint-container { margin:15px 0; }
+  .hint, .extra-hint { font-size:16px; color:#333; }
+  .extra-hint { margin-top:8px; font-style:italic; color:#007BFF; }
+  .result { margin-top:15px; font-weight:bold; font-size:20px; transition:0.5s; }
+  .lightbulb { display:inline-block; margin-left:8px; cursor:pointer; font-size:20px; }
+  /* Profile styling */
+  .profile-fixed { position:fixed; top:15px; left:15px; cursor:pointer; display:flex; align-items:center; gap:10px; z-index:1000; }
+  .profile-fixed img { width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid white; }
+  .profile-menu { position:absolute; top:60px; left:0; background:white; border-radius:12px; box-shadow:0 5px 15px rgba(0,0,0,0.3); padding:15px; display:none; z-index:1000; }
+  .profile-menu button { width:100%; margin-top:5px; }
+  /* Animations */
+  .correct-animation, .wrong-animation {
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%) scale(1);
+    font-size:60px;
+    font-weight:bold;
+    pointer-events:none;
+    opacity:0;
+    z-index:2000;
+    text-shadow:0 0 20px;
   }
-
-  .card {
-    position: relative;
-    background: white;
-    border-radius: 20px;
-    padding: 30px 40px 40px 40px;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.4);
-    text-align: center;
-    min-width: 350px;
-    max-width: 500px;
-    transition: transform 0.2s;
+  .correct-animation { color:#00ff00; text-shadow:0 0 20px #00ff00; animation: correctPop 1s forwards; }
+  .wrong-animation { color:#ff0000; text-shadow:0 0 20px #ff0000; animation: wrongPop 1s forwards; }
+  @keyframes correctPop {
+    0% { opacity:0; transform:translate(-50%,-50%) scale(0.5); }
+    30% { opacity:1; transform:translate(-50%,-50%) scale(1.2); }
+    60% { transform:translate(-50%,-50%) scale(1); }
+    100% { opacity:0; transform:translate(-50%,-50%) scale(1); }
   }
-
-  .card:hover { transform: scale(1.02); }
-  h1, h2, h3 { color: #003366; margin-bottom: 20px; }
-  input {
-    width: 85%;
-    padding: 12px;
-    margin: 12px 0;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    font-size: 16px;
-    font-family: 'Comfortaa', cursive;
-    transition: 0.2s;
+  @keyframes wrongPop {
+    0% { opacity:0; transform:translate(-50%,-50%) scale(0.5); }
+    30% { opacity:1; transform:translate(-50%,-50%) scale(1.2); }
+    60% { transform:translate(-50%,-50%) scale(1); }
+    100% { opacity:0; transform:translate(-50%,-50%) scale(1); }
   }
-  input:focus { border-color: #007BFF; box-shadow: 0 0 5px rgba(0,123,255,0.5); outline: none; }
-  button {
-    padding: 12px 25px;
-    margin-top: 15px;
-    border-radius: 8px;
-    border: none;
-    font-family: 'Comfortaa', cursive;
-    font-size: 16px;
-    background-color: #007BFF;
-    color: white;
-    cursor: pointer;
-    transition: 0.2s;
-  }
-  button:hover { background-color: #0056b3; }
-  .red-button {
-    background-color: #FF4C4C;
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    padding: 8px 15px;
-    border-radius: 8px;
-  }
-  .red-button:hover { background-color: #cc0000; }
-  .hidden { display: none; }
-  .streak { font-size: 24px; margin-bottom: 20px; color: #ff4500; }
-  .hint-container { margin: 15px 0; }
-  .hint, .extra-hint { font-size: 16px; color: #333; }
-  .extra-hint { margin-top: 8px; font-style: italic; color: #007BFF; }
-  .result { margin-top: 15px; font-weight: bold; font-size: 20px; transition: 0.5s; }
-  .correct { color: green; text-shadow: 0 0 10px #00ff00; animation: glow 0.7s ease-in-out; }
-  @keyframes glow { 0% { text-shadow:0 0 0 #00ff00;} 50%{text-shadow:0 0 15px #00ff00;} 100%{text-shadow:0 0 0 #00ff00;} }
 </style>
 </head>
 <body>
 
-<!-- Login / Sign Up -->
 <div id="authPage" class="card">
   <h1>Word Guess 🔥</h1>
   <h3>Sign Up / Log In</h3>
@@ -83,26 +65,24 @@
   <button id="signupBtn">Sign Up / Log In</button>
 </div>
 
-<!-- Main Menu -->
 <div id="mainMenu" class="card hidden">
   <div class="streak">🔥 Daily Streak: <span id="streakCount">0</span></div>
   <button id="startGameBtn">START</button>
   <button id="settingsBtn">Settings ⚙️</button>
 </div>
 
-<!-- Settings Page -->
 <div id="settingsPage" class="card hidden">
   <button class="red-button" id="settingsBackBtn">Back</button>
   <h2>Settings</h2>
   <button id="resetStreakBtn">Reset Streak</button>
 </div>
 
-<!-- Game Page -->
 <div id="gamePage" class="card hidden">
   <button class="red-button" id="leaveMenuBtn">Leave</button>
   <h2>Guess the Word</h2>
   <div class="hint-container">
     Hint: <span id="hint"></span>
+    <span class="lightbulb" id="lightbulbBtn">💡</span>
     <div class="extra-hint" id="extraHint"></div>
   </div>
   <input type="text" id="guessInput" placeholder="Your guess">
@@ -110,177 +90,167 @@
   <div class="result" id="result"></div>
 </div>
 
+<div class="profile-fixed" id="profileContainer">
+  <img id="profileImage" src="" alt="Profile">
+  <span id="profileUsername"></span>
+  <div class="profile-menu" id="profileMenu">
+    <button id="addProfileImageBtn">Add Profile Image</button>
+  </div>
+</div>
+<input type="file" id="profileFileInput" accept="image/png" style="display:none">
+
 <script>
-  const authPage = document.getElementById("authPage");
-  const mainMenu = document.getElementById("mainMenu");
-  const settingsPage = document.getElementById("settingsPage");
-  const gamePage = document.getElementById("gamePage");
-  const streakCount = document.getElementById("streakCount");
-  const extraHintDiv = document.getElementById("extraHint");
+// --- Elements ---
+const authPage=document.getElementById("authPage");
+const mainMenu=document.getElementById("mainMenu");
+const settingsPage=document.getElementById("settingsPage");
+const gamePage=document.getElementById("gamePage");
+const streakCount=document.getElementById("streakCount");
+const extraHintDiv=document.getElementById("extraHint");
+const lightbulbBtn=document.getElementById("lightbulbBtn");
 
-  const usernameInput = document.getElementById("usernameInput");
-  const passwordInput = document.getElementById("passwordInput");
+const profileContainer=document.getElementById("profileContainer");
+const profileMenu=document.getElementById("profileMenu");
+const profileImage=document.getElementById("profileImage");
+const profileUsername=document.getElementById("profileUsername");
+const profileFileInput=document.getElementById("profileFileInput");
 
-  const words = [
-    {word: "apple", hint: "A fruit", extra: "It can be red, green, or yellow"},
-    {word: "banana", hint: "Yellow fruit", extra: "Monkeys love it"},
-    {word: "orange", hint: "Citrus fruit", extra: "Its color matches its name"},
-    {word: "guitar", hint: "Musical instrument", extra: "It has strings"},
-    {word: "bridge", hint: "Connects two points", extra: "You drive over it"},
-    {word: "python", hint: "Programming language", extra: "Named after a comedy group"},
-    {word: "castle", hint: "Medieval building", extra: "Kings and queens live here"},
-    {word: "planet", hint: "Orbits a star", extra: "Earth is one of them"}
-  ];
+const usernameInput=document.getElementById("usernameInput");
+const passwordInput=document.getElementById("passwordInput");
 
-  let currentWord = null;
-  let attemptCount = 0;
-  let consecutiveCorrect = 0;
-  let resetConfirm = false;
+let currentWord="", currentHints=[], hintClickCount=0, attemptCount=0, consecutiveCorrect=0;
+let resetConfirm=false;
 
-  function getUsers() { return JSON.parse(localStorage.getItem("users") || "{}"); }
-  function saveUsers(users) { localStorage.setItem("users", JSON.stringify(users)); }
-  function getCurrentUser() { return JSON.parse(localStorage.getItem("currentUser") || "null"); }
-  function saveCurrentUser(user) { localStorage.setItem("currentUser", JSON.stringify(user)); }
+// --- Huge word list (you can expand to 1000+) ---
+const hugeWordList=[
+  {word:"apple", category:"fruit", hint1:"A common fruit", hint2:"Can be red, green, or yellow"},
+  {word:"banana", category:"fruit", hint1:"Yellow fruit", hint2:"Monkeys love it"},
+  {word:"orange", category:"fruit", hint1:"Citrus fruit", hint2:"Its color matches its name"},
+  {word:"guitar", category:"instrument", hint1:"Musical instrument", hint2:"It has strings"},
+  {word:"bridge", category:"structure", hint1:"Connects two points", hint2:"You can drive over it"},
+  {word:"castle", category:"building", hint1:"Medieval building", hint2:"Kings and queens live here"},
+  {word:"python", category:"programming", hint1:"Programming language", hint2:"Named after a comedy group"},
+  {word:"turtle", category:"animal", hint1:"Slow-moving animal", hint2:"Has a shell"},
+  {word:"river", category:"nature", hint1:"Flows through land", hint2:"Has water"},
+  {word:"mountain", category:"nature", hint1:"High landform", hint2:"Can be climbed"},
+  {word:"rocket", category:"vehicle", hint1:"Goes to space", hint2:"Fuels with engines"},
+  {word:"camera", category:"device", hint1:"Captures images", hint2:"Used in photography"},
+  {word:"planet", category:"space", hint1:"Orbits a star", hint2:"Earth is one"},
+  {word:"diamond", category:"gem", hint1:"Expensive gem", hint2:"Hardest natural material"},
+  {word:"puzzle", category:"game", hint1:"Brain teaser", hint2:"Pieces fit together"},
+  {word:"coffee", category:"drink", hint1:"Morning beverage", hint2:"Can be hot or iced"},
+  {word:"butterfly", category:"animal", hint1:"Insect with wings", hint2:"Starts as a caterpillar"},
+  {word:"football", category:"sport", hint1:"Popular game", hint2:"Uses a round or oval ball"},
+  {word:"library", category:"place", hint1:"Holds books", hint2:"Quiet study area"},
+  {word:"umbrella", category:"item", hint1:"Used in rain", hint2:"Covers you from water"},
+  // You can copy this array and add hundreds more
+];
 
-  function checkDailyStreak(user) {
-    const today = new Date().toDateString();
-    if (user.lastPlayedDay !== today) {
-      if (user.lastPlayedDay && consecutiveCorrect < 5) {
-        user.streak = 0;
-        alert("Streak Reset!");
-      }
-      user.lastPlayedDay = today;
-      consecutiveCorrect = 0;
-    }
-    return user;
+// Shuffle and track used words
+let shuffledWords=[...hugeWordList].sort(()=>Math.random()-0.5);
+let usedWords=[];
+
+// Pick a new word
+function pickNewWord(){
+  if(shuffledWords.length===0){
+    shuffledWords=[...usedWords].sort(()=>Math.random()-0.5);
+    usedWords=[];
   }
+  const wordObj=shuffledWords.pop();
+  usedWords.push(wordObj);
+  return wordObj;
+}
 
-  // --- Sign Up / Log In ---
-  document.getElementById("signupBtn").addEventListener("click", () => {
-    const username = usernameInput.value.trim();
-    const password = passwordInput.value.trim();
-    if (!username || !password) return alert("Enter username and password!");
-    let users = getUsers();
-    let user;
-    if (users[username]) {
-      if (users[username].password === password) {
-        user = users[username];
-        alert("Logged in!");
-      } else return alert("Wrong password!");
-    } else {
-      user = {username, password, streak: 0, lastPlayedDay: ""};
-      users[username] = user;
-      alert("Account created!");
-    }
-    user = checkDailyStreak(user);
-    saveUsers(users);
-    saveCurrentUser(user);
-    streakCount.textContent = user.streak;
-    authPage.classList.add("hidden");
-    mainMenu.classList.remove("hidden");
-  });
+// LocalStorage helpers
+function getUsers(){ return JSON.parse(localStorage.getItem("users")||"{}"); }
+function saveUsers(users){ localStorage.setItem("users",JSON.stringify(users)); }
+function getCurrentUser(){ return JSON.parse(localStorage.getItem("currentUser")||"null"); }
+function saveCurrentUser(user){ localStorage.setItem("currentUser",JSON.stringify(user)); }
 
-  // --- Main Menu Buttons ---
-  document.getElementById("startGameBtn").addEventListener("click", () => {
-    mainMenu.classList.add("hidden");
-    gamePage.classList.remove("hidden");
-    loadNewWord();
-  });
+// Auth
+document.getElementById("signupBtn").addEventListener("click",()=>{
+  const username=usernameInput.value.trim();
+  const password=passwordInput.value.trim();
+  if(!username||!password) return alert("Enter username and password!");
+  let users=getUsers(); let user;
+  if(users[username]){
+    if(users[username].password===password){ user=users[username]; alert("Logged in!"); }
+    else return alert("Wrong password!");
+  }else{ user={username,password,streak:0,lastStreakTime:0,profileImage:""}; users[username]=user; alert("Account created!"); }
+  saveUsers(users); saveCurrentUser(user); streakCount.textContent=user.streak; updateProfileDisplay();
+  authPage.classList.add("hidden"); mainMenu.classList.remove("hidden");
+});
 
-  document.getElementById("settingsBtn").addEventListener("click", () => {
-    mainMenu.classList.add("hidden");
-    settingsPage.classList.remove("hidden");
-  });
+// Main menu
+document.getElementById("startGameBtn").addEventListener("click",()=>{ mainMenu.classList.add("hidden"); gamePage.classList.remove("hidden"); startNewWord(); });
+document.getElementById("settingsBtn").addEventListener("click",()=>{ mainMenu.classList.add("hidden"); settingsPage.classList.remove("hidden"); });
+document.getElementById("settingsBackBtn").addEventListener("click",()=>{ settingsPage.classList.add("hidden"); mainMenu.classList.remove("hidden"); resetConfirm=false; document.getElementById("resetStreakBtn").textContent="Reset Streak"; });
+document.getElementById("resetStreakBtn").addEventListener("click",()=>{
+  if(!resetConfirm){ document.getElementById("resetStreakBtn").textContent="Are you sure? Click again to confirm"; resetConfirm=true; }
+  else{ const user=getCurrentUser(); user.streak=0; consecutiveCorrect=0; user.lastStreakTime=0; saveCurrentUser(user); let users=getUsers(); users[user.username]=user; saveUsers(users); streakCount.textContent=0; alert("Streak reset!"); resetConfirm=false; document.getElementById("resetStreakBtn").textContent="Reset Streak"; }
+});
+document.getElementById("leaveMenuBtn").addEventListener("click",()=>{ gamePage.classList.add("hidden"); mainMenu.classList.remove("hidden"); });
 
-  document.getElementById("settingsBackBtn").addEventListener("click", () => {
-    settingsPage.classList.add("hidden");
-    mainMenu.classList.remove("hidden");
-    resetConfirm = false;
-    document.getElementById("resetStreakBtn").textContent = "Reset Streak";
-  });
+// Profile
+profileContainer.addEventListener("click",()=>{ profileMenu.style.display=profileMenu.style.display==="block"?"none":"block"; });
+document.getElementById("addProfileImageBtn").addEventListener("click",()=>{ profileFileInput.click(); });
+profileFileInput.addEventListener("change",(e)=>{
+  const file=e.target.files[0];
+  if(file && file.type==="image/png"){
+    const reader=new FileReader();
+    reader.onload=()=>{
+      const user=getCurrentUser(); user.profileImage=reader.result; saveCurrentUser(user); let users=getUsers(); users[user.username]=user; saveUsers(users); updateProfileDisplay(); profileMenu.style.display="none";
+    };
+    reader.readAsDataURL(file);
+  }else alert("Please select a PNG image!");
+});
+function updateProfileDisplay(){ const user=getCurrentUser(); if(user){ profileUsername.textContent=user.username; profileImage.src=user.profileImage||"https://via.placeholder.com/50"; } }
 
-  // --- Reset Streak ---
-  document.getElementById("resetStreakBtn").addEventListener("click", () => {
-    if (!resetConfirm) {
-      document.getElementById("resetStreakBtn").textContent = "Are you sure? Click again to confirm";
-      resetConfirm = true;
-    } else {
-      const user = getCurrentUser();
-      user.streak = 0;
-      consecutiveCorrect = 0;
-      saveCurrentUser(user);
-      let users = getUsers();
-      users[user.username] = user;
-      saveUsers(users);
-      streakCount.textContent = 0;
-      alert("Streak reset!");
-      resetConfirm = false;
-      document.getElementById("resetStreakBtn").textContent = "Reset Streak";
-    }
-  });
+// Lightbulb hints
+lightbulbBtn.addEventListener("click",()=>{ hintClickCount++; if(hintClickCount<=3){ extraHintDiv.textContent=currentHints[hintClickCount-1]; } else alert("No more hints!"); });
 
-  // --- Game Functions ---
-  function loadNewWord() {
-    attemptCount = 0;
-    currentWord = words[Math.floor(Math.random() * words.length)];
-    document.getElementById("hint").textContent = currentWord.hint;
-    extraHintDiv.textContent = "Extra hint: " + currentWord.extra;
-    document.getElementById("guessInput").value = "";
-    document.getElementById("result").textContent = "";
+// Start new word
+function startNewWord(){
+  attemptCount=0; hintClickCount=0; extraHintDiv.textContent="";
+  const w=pickNewWord();
+  currentWord=w.word.toLowerCase();
+  currentHints=[`Category: ${w.category}`, w.hint1, w.hint2];
+  document.getElementById("hint").textContent=`Word has ${currentWord.length} letters, starts with '${currentWord[0].toUpperCase()}'`;
+  document.getElementById("guessInput").value="";
+  document.getElementById("result").textContent="";
+}
+
+// Submit guess
+document.getElementById("submitGuessBtn").addEventListener("click",()=>{
+  const guess=document.getElementById("guessInput").value.trim().toLowerCase();
+  if(!guess) return;
+  attemptCount++;
+  const resultDiv=document.getElementById("result");
+  if(guess===currentWord){
+    resultDiv.textContent="CORRECT!"; resultDiv.classList.add("correct"); setTimeout(()=>resultDiv.classList.remove("correct"),1500);
+    showCorrectAnimation(); handleWordCorrect();
+  } else {
+    if(attemptCount>=5){ resultDiv.textContent="Too many attempts! Answer: "+currentWord; consecutiveCorrect=0; showWrongAnimation(); startNewWord(); }
+    else resultDiv.textContent=`Try Again! (${attemptCount}/5)`;
   }
+});
 
-  function wordFailed() {
-    consecutiveCorrect = 0;
-    loadNewWord();
+// Animations
+function showCorrectAnimation(){ const anim=document.createElement("div"); anim.className="correct-animation"; anim.textContent="CORRECT!"; document.body.appendChild(anim); setTimeout(()=>{ document.body.removeChild(anim); },1000); }
+function showWrongAnimation(){ const anim=document.createElement("div"); anim.className="wrong-animation"; anim.textContent="WRONG!"; document.body.appendChild(anim); setTimeout(()=>{ document.body.removeChild(anim); },1000); }
+
+// Handle correct & streak
+function handleWordCorrect(){
+  consecutiveCorrect++; const user=getCurrentUser(); const now=Date.now();
+  if(user.lastStreakTime && now-user.lastStreakTime<10*60*60*1000){
+    if(consecutiveCorrect>=5){ alert("You completed 5 words but cooldown active! Wait 10 hours."); consecutiveCorrect=0; startNewWord(); return; }
+  } else if(consecutiveCorrect>=5){
+    user.streak++; user.lastStreakTime=now; alert("Streak Updated!"); consecutiveCorrect=0;
+    saveCurrentUser(user); let users=getUsers(); users[user.username]=user; saveUsers(users); streakCount.textContent=user.streak;
+    gamePage.classList.add("hidden"); mainMenu.classList.remove("hidden"); return;
   }
-
-  function wordCorrect() {
-    consecutiveCorrect++;
-    if (consecutiveCorrect >= 5) {
-      const user = getCurrentUser();
-      user.streak++;
-      alert("Streak Updated!");
-      consecutiveCorrect = 0;
-      user.lastPlayedDay = new Date().toDateString();
-      saveCurrentUser(user);
-      let users = getUsers();
-      users[user.username] = user;
-      saveUsers(users);
-      streakCount.textContent = user.streak;
-      gamePage.classList.add("hidden");
-      mainMenu.classList.remove("hidden");
-      return;
-    }
-    loadNewWord();
-  }
-
-  document.getElementById("submitGuessBtn").addEventListener("click", () => {
-    const guess = document.getElementById("guessInput").value.trim().toLowerCase();
-    if (!guess) return;
-    attemptCount++;
-    const resultDiv = document.getElementById("result");
-
-    if (guess === currentWord.word.toLowerCase()) {
-      resultDiv.textContent = "CORRECT!";
-      resultDiv.classList.add("correct");
-      setTimeout(() => resultDiv.classList.remove("correct"), 1500);
-      wordCorrect();
-    } else {
-      if (attemptCount >= 5) {
-        resultDiv.textContent = "Too many attempts! Answer: " + currentWord.word;
-        wordFailed();
-      } else {
-        resultDiv.textContent = `Try Again! (${attemptCount}/5)`;
-        resultDiv.classList.remove("correct");
-      }
-    }
-  });
-
-  document.getElementById("leaveMenuBtn").addEventListener("click", () => {
-    gamePage.classList.add("hidden");
-    mainMenu.classList.remove("hidden");
-  });
-
+  startNewWord();
+}
 </script>
 </body>
 </html>
